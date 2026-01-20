@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html lang="ta">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sudha's Home Made Enterprise</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>.hidden-view { display: none !important; } .loader { border-top-color: #0081C9; animation: spinner 1.5s linear infinite; } @keyframes spinner { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }</style>
+</head>
+<body class="bg-gray-50 text-gray-800">
+
+    <div id="loading-screen" class="fixed inset-0 bg-white z-[200] flex flex-col items-center justify-center">
+        <div class="loader rounded-full border-4 h-12 w-12 mb-4"></div>
+        <p class="text-[10px] font-black uppercase text-gray-400">Syncing Enterprise Data...</p>
+    </div>
+
+    <header class="bg-[#0081C9] text-white p-5 sticky top-0 z-[100] shadow-md flex justify-between items-center rounded-b-3xl">
+        <h1 onclick="showView('view-dashboard')" class="font-black text-xl tracking-tight uppercase">Sudha's Home Made</h1>
+        <button id="back-btn" onclick="showView('view-dashboard')" class="hidden-view bg-white/20 px-4 py-1 rounded-xl text-[10px] font-black">BACK</button>
+    </header>
+
+    <main id="view-dashboard" class="p-4 space-y-6">
+        <div class="grid grid-cols-4 gap-2 bg-white p-5 rounded-[32px] shadow-sm">
+            <button onclick="showView('view-order')" class="text-center"><div class="w-10 h-10 bg-blue-50 rounded-xl mx-auto flex items-center justify-center mb-1 text-[#0081C9]"><i class="fa-solid fa-cart-shopping"></i></div><p class="text-[8px] font-black uppercase">Order</p></button>
+            <button onclick="showView('view-ledger')" class="text-center"><div class="w-10 h-10 bg-orange-50 rounded-xl mx-auto flex items-center justify-center mb-1 text-orange-600"><i class="fa-solid fa-file-invoice-dollar"></i></div><p class="text-[8px] font-black uppercase">Ledger</p></button>
+            <button onclick="showView('view-production')" class="text-center"><div class="w-10 h-10 bg-purple-50 rounded-xl mx-auto flex items-center justify-center mb-1 text-purple-600"><i class="fa-solid fa-layer-group"></i></div><p class="text-[8px] font-black uppercase">Stock</p></button>
+            <button onclick="showView('view-material')" class="text-center"><div class="w-10 h-10 bg-green-50 rounded-xl mx-auto flex items-center justify-center mb-1 text-green-600"><i class="fa-solid fa-boxes-stacked"></i></div><p class="text-[8px] font-black uppercase">Material</p></button>
+        </div>
+
+        <div class="bg-white rounded-[32px] p-6 shadow-sm border border-blue-50 space-y-4">
+            <h3 class="text-gray-400 text-[10px] font-black uppercase text-center">Collection Status</h3>
+            <div class="h-44 w-44 mx-auto"><canvas id="colChart"></canvas></div>
+            <div class="grid grid-cols-2 gap-4 text-center uppercase font-black text-[10px]">
+                <div class="text-green-600">Paid: <p id="d-paid" class="text-sm">₹0</p></div>
+                <div class="text-red-500 border-l">Pending: <p id="d-pend" class="text-sm">₹0</p></div>
+            </div>
+        </div>
+    </main>
+
+    <main id="view-order" class="hidden-view p-4 pb-32 space-y-4">
+        <div class="bg-white rounded-xl p-4 border flex justify-between items-center text-[10px] font-bold text-gray-400">
+            <div>Invoice No. <div class="text-gray-800">35 <i class="fa-solid fa-chevron-down text-[7px]"></i></div></div>
+            <div class="text-right">Date <div class="text-gray-800">19/01/2026</div></div>
+        </div>
+        <div class="bg-white rounded-xl p-5 border space-y-3">
+            <div class="flex justify-between items-center text-[10px] font-black uppercase text-gray-400">Customer Name * <span class="text-green-600 italic">Bal: ₹ <span id="party-bal">0</span></span></div>
+            <select id="o-cust" onchange="updCust()" class="w-full border-2 rounded-xl p-3 font-bold text-sm bg-gray-50 outline-none"></select>
+        </div>
+        <div id="p-list" class="bg-white rounded-xl border divide-y overflow-hidden"></div>
+    </main>
+
+    <main id="view-ledger" class="hidden-view p-4 space-y-4">
+        <div class="bg-white p-6 rounded-[32px] shadow-sm border border-orange-50 space-y-4">
+            <select id="l-cust" onchange="renderL()" class="w-full border-b-2 py-2 font-bold outline-none bg-transparent"><option value="">-- Choose Customer --</option></select>
+            <div id="l-box" class="grid grid-cols-3 gap-2 text-center hidden-view pt-2">
+                <div class="bg-blue-50 p-2 rounded-xl text-[8px] font-black text-blue-600 uppercase">Orders<p id="l-ord" class="text-xs">₹0</p></div>
+                <div class="bg-green-50 p-2 rounded-xl text-[8px] font-black text-green-600 uppercase">Paid<p id="l-pad" class="text-xs">₹0</p></div>
+                <div class="bg-red-50 p-2 rounded-xl text-[8px] font-black text-red-600 uppercase">Bal<p id="l-bal" class="text-xs font-black text-red-700">₹0</p></div>
+            </div>
+            <button onclick="wa()" class="w-full bg-green-500 text-white py-3 rounded-xl font-black uppercase text-[10px] hidden-view" id="wa-btn"><i class="fa-brands fa-whatsapp"></i> WhatsApp Bill</button>
+        </div>
+        <div id="l-hist" class="space-y-2 pb-20"></div>
+    </main>
+
+    <footer id="ord-foot" class="hidden-view fixed bottom-0 left-0 right-0 bg-white p-6 flex items-center justify-between shadow-2xl rounded-t-[40px] border-t z-[150]">
+        <div><p class="text-[9px] text-gray-400 font-black">Grand Total</p><p class="text-2xl font-black">₹ <span id="t-val">0.00</span></p></div>
+        <button onclick="subOrd()" class="bg-[#0081C9] text-white px-10 py-4 rounded-2xl font-black">CONFIRM SALE</button>
+    </footer>
+
+    <script>
+        const webAppUrl = "இங்கே_உங்கள்_WEB_APP_URL_ஐ_போடவும்"; 
+        let db = { products: [], customers: [], orders: [], payments: [], stats: {} };
+        let chart;
+
+        window.onload = load;
+
+        async function load() {
+            const res = await fetch(webAppUrl);
+            db = await res.json();
+            render();
+            document.getElementById('loading-screen').classList.add('hidden-view');
+        }
+
+        function render() {
+            const opts = '<option value="">-- Select Customer --</option>' + db.customers.map(c => `<option value="${c.name}">${c.name}</option>`).join('');
+            document.getElementById('o-cust').innerHTML = opts;
+            document.getElementById('l-cust').innerHTML = opts;
+            
+            document.getElementById('p-list').innerHTML = db.products.map((p, i) => `
+                <div class="p-4 space-y-2">
+                    <div class="flex justify-between font-black text-sm text-gray-800"><span>#${i+1} ${p.name}</span><span>₹ <span class="sub">${p.price}</span></span></div>
+                    <div class="flex justify-between items-center text-[10px] text-gray-400 font-bold"><span>Rate: ₹${p.price} x Qty</span><div class="flex items-center border rounded-lg bg-gray-50"><button onclick="q(this,-1,${p.price})" class="px-3 py-1 text-blue-600 font-black">-</button><input type="number" value="0" readonly class="w-8 text-center bg-transparent p-qty"><button onclick="q(this,1,${p.price})" class="px-3 py-1 text-blue-600 font-black">+</button></div></div>
+                </div>`).join('');
+
+            const ctx = document.getElementById('colChart').getContext('2d');
+            if(chart) chart.destroy();
+            chart = new Chart(ctx, { type: 'doughnut', data: { datasets: [{ data: [db.stats.paid, db.stats.pending], backgroundColor: ['#22c55e', '#ef4444'], borderWidth: 0 }] }, options: { cutout: '80%', plugins: { legend: { display: false } } } });
+            document.getElementById('d-paid').innerText = "₹"+db.stats.paid; document.getElementById('d-pend').innerText = "₹"+db.stats.pending;
+        }
+
+        function renderL() {
+            const name = document.getElementById('l-cust').value;
+            if(!name) return;
+            document.getElementById('l-box').classList.remove('hidden-view'); document.getElementById('wa-btn').classList.remove('hidden-view');
+            const o = db.orders.filter(x => x.customer === name), p = db.payments.filter(x => x.customer === name);
+            const to = o.reduce((s,x)=>s+x.total,0), tp = p.reduce((s,x)=>s+x.amount,0);
+            document.getElementById('l-ord').innerText = "₹"+to; document.getElementById('l-pad').innerText = "₹"+tp; document.getElementById('l-bal').innerText = "₹"+(to-tp);
+            document.getElementById('l-hist').innerHTML = [...o.map(x=>({...x,t:'SALE'})), ...p.map(x=>({...x,t:'PAY',total:x.amount}))].sort((a,b)=>new Date(b.date)-new Date(a.date)).map(e => `<div class="bg-white p-3 rounded-xl flex justify-between text-[9px] font-black border"><div>${e.t}<p class="text-gray-400">${new Date(e.date).toLocaleDateString()}</p></div><p class="${e.t=='SALE'?'text-blue-600':'text-green-600'}">₹${e.total}</p></div>`).join('');
+        }
+
+        function showView(id) { document.querySelectorAll('main, footer, #back-btn').forEach(v => v.classList.add('hidden-view')); document.getElementById(id).classList.remove('hidden-view'); if(id === 'view-order') document.getElementById('ord-foot').classList.remove('hidden-view'); if(id !== 'view-dashboard') document.getElementById('back-btn').classList.remove('hidden-view'); }
+        function q(btn, c, p) { let i = btn.parentNode.querySelector('input'); let v = parseInt(i.value) + c; if(v >= 0) { i.value = v; btn.closest('.p-4').querySelector('.sub').innerText = (v * p); calc(); } }
+        function calc() { let t = 0; document.querySelectorAll('.sub').forEach(s => t += parseFloat(s.innerText)); document.getElementById('t-val').innerText = t.toFixed(2); }
+        function updCust() { const n = document.getElementById('o-cust').value; const o = db.orders.filter(x=>x.customer===n).reduce((s,x)=>s+x.total,0), p = db.payments.filter(x=>x.customer===n).reduce((s,x)=>s+x.amount,0); document.getElementById('party-bal').innerText = (o-p).toFixed(2); }
+        async function subOrd() { const c = document.getElementById('o-cust').value; const t = document.getElementById('t-val').innerText; if(!c || t == "0.00") return alert("Details missing!"); await fetch(webAppUrl, { method: 'POST', body: JSON.stringify({type:'NEW_ORDER', customer: c, total: parseFloat(t)})}); alert("Success!"); location.reload(); }
+        function wa() { window.open(`https://wa.me/?text=*Sudha's Home Made Bill*%0ABalance: ${document.getElementById('l-bal').innerText}`, '_blank'); }
+    </script>
+</body>
+</html>
