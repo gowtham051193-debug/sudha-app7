@@ -116,6 +116,20 @@
         function updCust() { const n = document.getElementById('o-cust').value; const o = db.orders.filter(x=>x.customer===n).reduce((s,x)=>s+x.total,0), p = db.payments.filter(x=>x.customer===n).reduce((s,x)=>s+x.amount,0); document.getElementById('party-bal').innerText = (o-p).toFixed(2); }
         async function subOrd() { const c = document.getElementById('o-cust').value; const t = document.getElementById('t-val').innerText; if(!c || t == "0.00") return alert("Details missing!"); await fetch(webAppUrl, { method: 'POST', body: JSON.stringify({type:'NEW_ORDER', customer: c, total: parseFloat(t)})}); alert("Success!"); location.reload(); }
         function wa() { window.open(`https://wa.me/?text=*Sudha's Home Made Bill*%0ABalance: ${document.getElementById('l-bal').innerText}`, '_blank'); }
+    </main>
+
+    <script>
+        // உங்கள் Apps Script URL-ஐ இங்கே கொடுக்க வேண்டும்
+        const webAppUrl = "https://script.google.com/macros/s/AKfycbzX27yGV8UbLGU9KaxFx91GBsdNVEna8Uc1Yn248w73kBIano6GRsYk5iRnSMSGMvf-Cw/exec"; 
+
+        // இதற்குக் கீழே நான் கொடுத்த முழு ஜாவாஸ்கிரிப்ட் குறியீட்டையும் பேஸ்ட் செய்யவும்
+        async function fetchData() {
+            const res = await fetch(webAppUrl);
+            const db = await res.json();
+            // ... மற்ற லாஜிக்குகள்
+        }
     </script>
+</body>
+</html>
 </body>
 </html>
