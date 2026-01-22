@@ -134,10 +134,8 @@
 </main> 
 
     <script>
-        // உங்கள் Apps Script URL
         const webAppUrl = "https://script.google.com/macros/s/.../exec";
 
-        // அனைத்து ஜாவாஸ்கிரிப்ட் பங்க்ஷன்களையும் இங்கே ஒன்றாகச் சேர்க்கவும்
         function calc() { 
             let t = 0; 
             document.querySelectorAll('.sub').forEach(s => t += parseFloat(s.innerText)); 
@@ -145,14 +143,12 @@
         }
 
         function updCust() { 
-            // உங்கள் லாஜிக் இங்கே...
         }
 
         function wa() { 
             window.open(`https://wa.me/?text=Bill_Details`, '_blank'); 
         }
         
-        // மீதமுள்ள அனைத்து குறியீடுகளும் இங்கே வர வேண்டும்...
     </script>
 </body>
 </html>
