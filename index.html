@@ -10,7 +10,22 @@
     <style>.hidden-view { display: none !important; } .loader { border-top-color: #0081C9; animation: spinner 1.5s linear infinite; } @keyframes spinner { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }</style>
 </head>
 <body class="bg-gray-50 text-gray-800">
+<div id="g_id_onload"
+     data-client_id="இங்கே_உங்கள்_CLIENT_ID_ஐ_பேஸ்ட்_செய்யவும்.apps.googleusercontent.com"
+     data-context="signin"
+     data-ux_mode="popup"
+     data-callback="handleCredentialResponse"
+     data-auto_prompt="false">
+</div>
 
+<div class="g_id_signin"
+     data-type="standard"
+     data-shape="rectangular"
+     data-theme="outline"
+     data-text="signin_with"
+     data-size="large"
+     data-logo_alignment="left">
+</div>
     <div id="loading-screen" class="fixed inset-0 bg-white z-[200] flex flex-col items-center justify-center">
         <div class="loader rounded-full border-4 h-12 w-12 mb-4"></div>
         <p class="text-[10px] font-black uppercase text-gray-400">Syncing Enterprise Data...</p>
