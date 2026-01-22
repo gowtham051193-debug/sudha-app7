@@ -131,7 +131,6 @@
         function updCust() { const n = document.getElementById('o-cust').value; const o = db.orders.filter(x=>x.customer===n).reduce((s,x)=>s+x.total,0), p = db.payments.filter(x=>x.customer===n).reduce((s,x)=>s+x.amount,0); document.getElementById('party-bal').innerText = (o-p).toFixed(2); }
         async function subOrd() { const c = document.getElementById('o-cust').value; const t = document.getElementById('t-val').innerText; if(!c || t == "0.00") return alert("Details missing!"); await fetch(webAppUrl, { method: 'POST', body: JSON.stringify({type:'NEW_ORDER', customer: c, total: parseFloat(t)})}); alert("Success!"); location.reload(); }
         function wa() { window.open(`https://wa.me/?text=*Sudha's Home Made Bill*%0ABalance: ${document.getElementById('l-bal').innerText}`, '_blank'); }
-  </main> 
 
     <script>
         // உங்கள் Apps Script URL-ஐ இங்கே கொடுக்கவும்
