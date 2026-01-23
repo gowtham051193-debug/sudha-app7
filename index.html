@@ -68,4 +68,92 @@
                     <div class="bg-green-50 p-2 rounded-xl text-[8px] font-black text-green-600 uppercase">Paid<p id="l-pad" class="text-xs">₹0</p></div>
                     <div class="bg-red-50 p-2 rounded-xl text-[8px] font-black text-red-600 uppercase">Bal<p id="l-bal" class="text-xs font-black text-red-700">₹0</p></div>
                 </div>
-                <button onclick="wa()" class="w-full bg-green-500 text-white py-3 rounded-xl font-black uppercase text-[10px] hidden-view" id="wa-btn"><i class="fa-brands fa
+                <button onclick="wa()" class="w-full bg-green-500 text-white py-3 rounded-xl font-black uppercase text-[10px] hidden-view" id="wa-btn"><i class="fa-brands fa-whatsapp"></i> WhatsApp Bill</button>
+            </div>
+            <div id="l-hist" class="space-y-2 pb-20"></div>
+        </main>
+
+        <footer id="ord-foot" class="hidden-view fixed bottom-0 left-0 right-0 bg-white p-6 flex items-center justify-between shadow-2xl rounded-t-[40px] border-t z-[150]">
+            <div><p class="text-[9px] text-gray-400 font-black">Grand Total</p><p class="text-2xl font-black">₹ <span id="t-val">0.00</span></p></div>
+            <button onclick="subOrd()" class="bg-[#0081C9] text-white px-10 py-4 rounded-2xl font-black">CONFIRM SALE</button>
+        </footer>
+    </div>
+
+    <script>
+        const webAppUrl = "https://script.google.com/macros/s/AKfycbzys9BWYYoCHIRaMs7A1WLDrE7ga73oQx6P9x9Vsay7F6GDvgm_dqkPrIchFaime9Ntsw/exec"; 
+        let db = { products: [], customers: [], orders: [], payments: [], stats: {} };
+        let chart;
+
+        // 1. லாகின் மற்றும் OTP பங்க்ஷன்கள்
+        async function sendOTP() {
+            const email = document.getElementById('user-email').value;
+            if(!email) return alert("Please enter email!");
+            document.getElementById('msg').innerText = "Sending OTP...";
+            try {
+                const res = await fetch(webAppUrl, { method: 'POST', body: JSON.stringify({ type: 'SEND_OTP', email: email }) });
+                const result = await res.json();
+                if(result.status === "SENT") {
+                    alert("OTP மின்னஞ்சலுக்கு அனுப்பப்பட்டது!");
+                    document.getElementById('msg').innerText = "Enter OTP in Password field";
+                }
+            } catch(e) { alert("Error sending OTP"); }
+        }
+
+        async function handleLogin() {
+            const email = document.getElementById('user-email').value;
+            const pass = document.getElementById('user-pass').value;
+            if(!email || !pass) return alert("Details required!");
+            
+            document.getElementById('msg').innerText = "Verifying...";
+            try {
+                const res = await fetch(webAppUrl, { method: 'POST', body: JSON.stringify({ type: 'LOGIN', email: email, password: pass }) });
+                const result = await res.json();
+                
+                if(result.status === "SUCCESS") {
+                    db = result.data; // உங்கள் 8 ஷீட் டேட்டாக்கள்
+                    document.getElementById('login-screen').classList.add('hidden-view');
+                    document.getElementById('app-content').classList.remove('hidden-view');
+                    render(); // டேஷ்போர்டை உருவாக்குதல்
+                } else {
+                    document.getElementById('msg').innerText = "Invalid Login!";
+                }
+            } catch(e) { alert("Login Error: Check Apps Script"); }
+        }
+
+        // 2. டேட்டா ரெண்டரிங் மற்றும் பிசினஸ் லாஜிக்
+        function render() {
+            const opts = '<option value="">-- Select Customer --</option>' + db.customers.map(c => `<option value="${c.name}">${c.name}</option>`).join('');
+            document.getElementById('o-cust').innerHTML = opts;
+            document.getElementById('l-cust').innerHTML = opts;
+            
+            document.getElementById('p-list').innerHTML = db.products.map((p, i) => `
+                <div class="p-4 space-y-2">
+                    <div class="flex justify-between font-black text-sm text-gray-800"><span>#${i+1} ${p.name}</span><span>₹ <span class="sub">0.00</span></span></div>
+                    <div class="flex justify-between items-center text-[10px] text-gray-400 font-bold"><span>Rate: ₹${p.price}</span><div class="flex items-center border rounded-lg bg-gray-50"><button onclick="q(this,-1,${p.price})" class="px-3 py-1 text-blue-600 font-black">-</button><input type="number" value="0" readonly class="w-8 text-center bg-transparent p-qty"><button onclick="q(this,1,${p.price})" class="px-3 py-1 text-blue-600 font-black">+</button></div></div>
+                </div>`).join('');
+
+            const ctx = document.getElementById('colChart').getContext('2d');
+            if(chart) chart.destroy();
+            chart = new Chart(ctx, { type: 'doughnut', data: { datasets: [{ data: [db.stats.paid, db.stats.pending], backgroundColor: ['#22c55e', '#ef4444'], borderWidth: 0 }] }, options: { cutout: '80%', plugins: { legend: { display: false } } } });
+            document.getElementById('d-paid').innerText = "₹"+db.stats.paid; document.getElementById('d-pend').innerText = "₹"+db.stats.pending;
+        }
+
+        // 3. இதர பங்க்ஷன்கள்
+        function showView(id) { document.querySelectorAll('main, footer, #back-btn').forEach(v => v.classList.add('hidden-view')); document.getElementById(id).classList.remove('hidden-view'); if(id === 'view-order') document.getElementById('ord-foot').classList.remove('hidden-view'); if(id !== 'view-dashboard') document.getElementById('back-btn').classList.remove('hidden-view'); }
+        function q(btn, c, p) { let i = btn.parentNode.querySelector('input'); let v = parseInt(i.value) + c; if(v >= 0) { i.value = v; btn.closest('.p-4').querySelector('.sub').innerText = (v * p).toFixed(2); calc(); } }
+        function calc() { let t = 0; document.querySelectorAll('.sub').forEach(s => t += parseFloat(s.innerText)); document.getElementById('t-val').innerText = t.toFixed(2); }
+        function updCust() { const n = document.getElementById('o-cust').value; const o = db.orders.filter(x=>x.customer===n).reduce((s,x)=>s+x.total,0), p = db.payments.filter(x=>x.customer===n).reduce((s,x)=>s+x.amount,0); document.getElementById('party-bal').innerText = (o-p).toFixed(2); }
+        async function subOrd() { const c = document.getElementById('o-cust').value; const t = document.getElementById('t-val').innerText; if(!c || t == "0.00") return alert("Details missing!"); await fetch(webAppUrl, { method: 'POST', body: JSON.stringify({type:'NEW_ORDER', customer: c, total: parseFloat(t)})}); alert("Order Success!"); location.reload(); }
+        function renderL() {
+            const name = document.getElementById('l-cust').value;
+            if(!name) return;
+            document.getElementById('l-box').classList.remove('hidden-view'); document.getElementById('wa-btn').classList.remove('hidden-view');
+            const o = db.orders.filter(x => x.customer === name), p = db.payments.filter(x => x.customer === name);
+            const to = o.reduce((s,x)=>s+x.total,0), tp = p.reduce((s,x)=>s+x.amount,0);
+            document.getElementById('l-ord').innerText = "₹"+to; document.getElementById('l-pad').innerText = "₹"+tp; document.getElementById('l-bal').innerText = "₹"+(to-tp);
+            document.getElementById('l-hist').innerHTML = [...o.map(x=>({...x,t:'SALE'})), ...p.map(x=>({...x,t:'PAY',total:x.amount}))].sort((a,b)=>new Date(b.date)-new Date(a.date)).map(e => `<div class="bg-white p-3 rounded-xl flex justify-between text-[9px] font-black border"><div>${e.t}<p class="text-gray-400">${new Date(e.date).toLocaleDateString()}</p></div><p class="${e.t=='SALE'?'text-blue-600':'text-green-600'}">₹${e.total}</p></div>`).join('');
+        }
+        function wa() { window.open(`https://wa.me/?text=*Sudha's Home Made Bill*%0ABalance: ${document.getElementById('l-bal').innerText}`, '_blank'); }
+    </script>
+</body>
+</html>
